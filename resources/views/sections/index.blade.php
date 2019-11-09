@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,6 +15,21 @@
 	<select name="" id="">
 		<option value=""></option>
 	</select>
+
+	<p>Without Multiple Choice</p>
+        <ul>
+            {{-- loop through the filtered questions --}}
+            <li v-for='student in unpaidStudents'>
+                @{{ student.body }}
+            </li>
+        </ul>
+        <p>With Multiple Choice</p>
+        <ul>
+            {{-- loop through the filtered questions --}}
+            <li v-for='student in paidStudents'>
+                @{{ student.body }}
+            </li>
+        </ul>
 </div>
 </body>
 
@@ -26,21 +40,34 @@
 	var vm = new Vue ({
 		el: '#app',
 		data: {
-			selected_section: ''
+			selected_section: '',
+			students: []
 		},
 		methods: {
 			fetchStudents(){
-				axios.get('/students?section_id='+this.selected_section).then(({data}) => {
-					console.log(data);
+				axios.get('/students?section_id='+this.selected_section).then(function(response) {
+					console.log(response.data);
+					vm.students = response.data;
 				});
 			}
 		},
-		mounted(){
-			axios.get('/students').then(({data}) =>{
-				console.log(data)
-			});
-
-		}
+		computed: {
+			paidStudents() {
+                    //return filtered questions
+                    return this.students.filter(function(student) {
+                        //return only the questions wherein the is_multiple_choice is equal to 1
+                        return student.is_multiple_choice == 1;
+                    });
+                },
+                unpaidStudents() {
+                //return filtered questions
+                return this.students.filter(function(student) {
+                //return only the questions wherein the is_multiple_choice is equal to 0
+                return student.is_multiple_choice == 0;
+            });
+            }
+        }
+		
 	})
 </script>
 </html>
